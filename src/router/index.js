@@ -4,7 +4,7 @@ import Home from '../views/HomePage.vue'
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: '',
     component: Home
   },
   {
@@ -13,12 +13,29 @@ const routes = [
     component: Home
   },
   {
-    path: '/vote',
+    path: '/vote/:user_key',
     name: 'vote',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/VotePage.vue')
+    component: () => import('../views/VotePage.vue')
+  },
+  {
+    path: '/ticket',
+    name: 'ticket',
+    query: { k: '' },
+    component: () => import('../views/TicketPage.vue')
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('../views/AdminPage.vue')
+  },
+  {
+    path: '/wechat',
+    name: 'wechat',
+    query: {code: ''},
+    component: () => import('../views/WechatPage.vue')
   }
 ]
 

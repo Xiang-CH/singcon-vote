@@ -1,5 +1,5 @@
 {
-  "name": "singcon-vote",
+  "name": "cssaud-singcon",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,9 +12,9 @@
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
     "vue-barcode-reader": "^1.0.3",
-    "vue-qrcode-reader": "^3.1.5",
     "vue-router": "^4.1.6",
-    "vuetify": "^3.1.13"
+    "vuetify": "^3.1.13",
+    "weixin-js-sdk": "^1.6.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

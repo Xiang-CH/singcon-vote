@@ -1,5 +1,12 @@
 <template>
-  <router-view/>
+  <v-app>
+    <v-app-bar color="primary" style="height:70px" flat>
+      <h1>2023 Singing Contest</h1>
+    </v-app-bar>
+    <v-sheet style="margin-top:70px">
+      <router-view/>
+    </v-sheet>
+  </v-app>
 </template>
 
 
@@ -10,19 +17,11 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-color: #cbd0d4 !important;
 }
 
-nav {
-  padding: 30px;
+h1{
+  margin:auto;
+  text-align: center;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
