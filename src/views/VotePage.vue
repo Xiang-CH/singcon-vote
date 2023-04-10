@@ -249,7 +249,7 @@ export default {
             this.vote_status = res.data.vote_detail.vote_status;
             this.round = res.data.vote_detail.vote_title;
             this.options = res.data.vote_detail.option_list;
-            this.endTime = new Date('Apr 11, 23 01:15:40 GMT+08:00')//res.data.vote_detail.vote_end_time;
+            this.endTime = new Date('Apr 11, 23 01:59:40 GMT+08:00')//res.data.vote_detail.vote_end_time;
             if(res.data.vote_detail.vote_status == 'open' && res.data.vote_detail.is_voted==false){
               setInterval(() => {
                 this.startTimer();
