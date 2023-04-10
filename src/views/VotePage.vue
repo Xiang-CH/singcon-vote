@@ -325,7 +325,7 @@ h1{
 }
 .loading {
   position: absolute;
-  top:44vh;
+  top:45vh;
   left:40vw;
   width: 20vw;
 }
