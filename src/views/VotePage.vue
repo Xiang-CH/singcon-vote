@@ -131,9 +131,9 @@
                 :subtitle="item.song_name"
                 :prepend-avatar="item.singer_info.singer_photo"
                 rounded="xl"
-                :class="'px-4 '+(chosen.indexOf(item.option_id)>-1? 'active' : 'inactive')" 
+                :class="'px-4 '+(chosen.indexOf(parseInt(item.option_id))>-1? 'active' : 'inactive')" 
                 @click="toggleActive(item.option_id)" 
-                :disabled="(chosen.length >= max_select && chosen.indexOf(item.option_id)<0? true : false)"
+                :disabled="(chosen.length >= max_select && chosen.indexOf(parseInt(item.option_id))<0? true : false)"
               >
 
               </v-list-item>
@@ -230,6 +230,7 @@ export default {
 
 
     toggleActive(index) {
+      index = parseInt(index)
       if (this.chosen.indexOf(index) > -1) {
         this.chosen.splice(this.chosen.indexOf(index), 1);
       } else {
@@ -241,7 +242,7 @@ export default {
     },
 
     submit() {
-      console.log(this.chosen);
+      console.log(Array(this.chosen));
       if (this.chosen.length < this.max_select) {
         this.alert = true;
         setTimeout(() => {
@@ -253,7 +254,7 @@ export default {
         axios.post("https://api.singcon23.hkupootal.com/vote/vote.php", {
           user_key: this.key,
           vote_id: this.vote_id,
-          options_id_list: this.chosen.map((item) => {return parseInt(item, 10)})
+          option_id_list: "[" + this.chosen.toString() + "]"
         }, {
           headers:{
             'Content-Type': 'multipart/form-data'
@@ -266,14 +267,14 @@ export default {
               this.$router.push("/vote/"+this.key)
             } else {
               console.log(res.data);
-              this.alert(res.data.msg);
+              alert(res.data.msg);
             }
           }
         )
         .catch(
           err => {
             console.log(err);
-            this.alert("投票失败");
+            alert("投票失败");
           }
         )
       }
