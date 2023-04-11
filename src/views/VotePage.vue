@@ -15,26 +15,52 @@
   <v-window-item value="history">
     <!-- 历史投票 -->
     <v-card 
-      class="mx-auto w-75 py-2 px-2 mt-4 mb-2"
+      v-for="(round, i) in pastVote"
+      :key="i"
+      class="mx-2 w-auto py-2 px-2 mt-4 mb-2"
       max-width="400"
-      :title ="round"
-      subtitle="已投选手"
+      :title ="round.vote_title"
+      subtitle="晋级选手"
       rounded="xl"
       variant="elevated"
     >
-      <v-list lines="two" class="mx-2" nav>
+      <v-list lines="three" class="mx-2" nav>
+        
           <v-list-item
             variant = "flat"
-            style="text-align: left; font-size:15px;"
-            v-for= "(item, i) in options"
-            :key="i"
-            :title="item.singer_info.singer_name"
-            :subtitle="item.song_name"
-            :prepend-avatar="item.singer_info.singer_photo"
+            style="text-align: left; font-size:18px;"
+            v-for= "(singer, j) in round.option_list"
+            :key="j"
+            :title="singer.singer_info.singer_name"
+            :subtitle="singer.song_name"
+            :prepend-avatar="singer.singer_info.singer_photo"
             rounded="xl"
-            class="inactive"          
+            :class="'px-3 pt-3 pb-2 ' + (singer.is_win? 'active' : 'inactive')"  
+            @click = "this.showjudge[i][j] = !this.showjudge[i][j]"      
           >
+            <v-chip class="mr-1 my-0" size="x-small">观众分:{{ singer.vote_count }}</v-chip>
+            <v-chip class="mr-1 my-0" size="x-small">评委分:{{ singer.judge_average_score.toFixed(1)}}</v-chip>
+            <v-chip class="mr-1 my-0" size="x-small">总分:{{ singer.overall_score.toFixed(1) }}</v-chip>
+            <v-chip class="my-0" size="x-small" v-if="singer.is_vote">已选</v-chip>
 
+            <v-item-group v-if="this.showjudge[i][j]" class="my-2">
+                <v-list-item 
+                  lines="two"
+                  v-for="(judge, k) in singer.judge_list" 
+                  :key="k"
+                  variant = "flat"
+                  :title="judge.judge_info.judge_name"
+                  :subtitle="judge.judge_info.judge_intro"
+                  :prepend-avatar="judge.judge_info.judge_photo"
+                  rounded="xl"
+                >
+                  <v-chip class="mr-1 my-0" size="x-small">音乐性: {{ judge.music_score }}/35</v-chip>
+                  <v-chip class="mr-1 my-0" size="x-small">演唱: {{ judge.sing_score}}/35</v-chip>
+                  <v-chip class="mr-1 my-0" size="x-small">台风: {{ judge.manner_score }}/20</v-chip>
+                  <v-chip class="my-0" size="x-small">形象: {{ judge.image_score }}/10</v-chip>
+                </v-list-item>
+              
+            </v-item-group>
           </v-list-item>
 
       </v-list>
@@ -63,7 +89,7 @@
                 :subtitle="item.song_name"
                 :prepend-avatar="item.singer_info.singer_photo"
                 rounded="xl"
-                class="inactive"          
+                :class=" (item.is_voted? 'active':'inactive') +' px-4'"          
               >
 
               </v-list-item>
@@ -105,7 +131,7 @@
                 :subtitle="item.song_name"
                 :prepend-avatar="item.singer_info.singer_photo"
                 rounded="xl"
-                :class="(chosen.indexOf(item.option_id)>-1? 'active' : 'inactive')" 
+                :class="'px-4 '+(chosen.indexOf(item.option_id)>-1? 'active' : 'inactive')" 
                 @click="toggleActive(item.option_id)" 
                 :disabled="(chosen.length >= max_select && chosen.indexOf(item.option_id)<0? true : false)"
               >
@@ -163,6 +189,7 @@ export default {
       timer: null,
       endTime: null,
       pastVote: null,
+      showjudge: null,
     };
   },
   computed: {
@@ -176,6 +203,7 @@ export default {
     startTimer(){
       const timeNow = new Date().getTime();
       const timeDifference = this.endTime - timeNow;
+      console.log(timeDifference)
 
       const millisecondsInOneSecond = 1000;
       const millisecondsInOneMinute = millisecondsInOneSecond * 60;
@@ -221,26 +249,48 @@ export default {
         }, 2000);
       } else {
         this.alert = false;
-        //post and reload
-        this.voted = true;
-        var picked = [this.options[parseInt(this.chosen[0])-1],this.options[parseInt(this.chosen[1])-1],this.options[parseInt(this.chosen[2])-1]];
-        this.options = picked;
+        //post and reload;
+        axios.post("https://api.singcon23.hkupootal.com/vote/vote.php", {
+          user_key: this.key,
+          vote_id: this.vote_id,
+          options_id_list: this.chosen.map((item) => {return parseInt(item, 10)})
+        }, {
+          headers:{
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        .then(
+          res => {
+            if (res.data.code == 200){
+              this.voted = true;
+              this.$router.push("/vote/"+this.key)
+            } else {
+              console.log(res.data);
+              this.alert(res.data.msg);
+            }
+          }
+        )
+        .catch(
+          err => {
+            console.log(err);
+            this.alert("投票失败");
+          }
+        )
       }
 
     },
 
     getNow(){
       this.loading = true;
-      console.log(this.$router)
-      this.key = this.$router.currentRoute.value.params.user_key;
       axios.post('https://api.singcon23.hkupootal.com/vote/getnow.php', {
-        user_key: this.$router.currentRoute.value.params.user_key
+        user_key: this.key
       },{
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(
         res => {
+          console.log(res.data)
           this.loading = false;
           if (res.data.code == 200) {
             this.vote_id = res.data.vote_detail.vote_id;
@@ -249,8 +299,9 @@ export default {
             this.vote_status = res.data.vote_detail.vote_status;
             this.round = res.data.vote_detail.vote_title;
             this.options = res.data.vote_detail.option_list;
-            this.endTime = new Date('Apr 11, 23 01:59:40 GMT+08:00')//res.data.vote_detail.vote_end_time;
+            this.endTime = res.data.vote_detail.vote_end_time * 1000;
             if(res.data.vote_detail.vote_status == 'open' && res.data.vote_detail.is_voted==false){
+              this.startTimer();
               setInterval(() => {
                 this.startTimer();
               }, 1000);
@@ -272,23 +323,44 @@ export default {
     },
 
     getPast(){
+      this.loading = true;
+      console.log(this.key)
       axios.post('https://api.singcon23.hkupootal.com/vote/getpast.php', {
         user_key: this.key
       },{
         headers: {
-          'Content-Type': 'mulipart/form-data'
+          'Content-Type': 'multipart/form-data'
         }
       }).then(
         res => {
+          console.log(res.data)
+          this.loading = false;
           if(res.data.code == 200){
             this.pastVote = res.data.vote_list;
+            this.initializedJudgeNoshow()
           }
         }
       )
-    }
+    },
+
+    initializedJudgeNoshow(){
+      var showjudge = [];
+      for(var i=0;i<this.pastVote.length;i++){
+        showjudge[i] = [];
+        for(var j=0;j<this.pastVote[i].option_list.length;j++){
+          showjudge[i][j] = false;
+        }
+      }
+      this.showjudge = showjudge;
+    },
+
+    
+
+    
   },
 
   mounted() {
+    this.key = this.$router.currentRoute.value.params.user_key;
     this.getNow();
   }
 };

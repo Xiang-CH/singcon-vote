@@ -48,7 +48,6 @@
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import axios from 'axios';
 import StaffBtn from '../components/StaffBtn.vue';
-import wx from 'weixin-js-sdk';
 
 export default {
     components: {
@@ -76,8 +75,10 @@ export default {
 
     methods: {
         verifyInWechat(){
-            wx.setStorageSync('user_key', this.key)
-            window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252Fsingcon23.hkupootal.com%252Fwechat&response_type=code&scope=snsapi_base#wechat_redirect";
+            sessionStorage.setItem("user_key", this.key);
+            const url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252Fsingcon23.hkupootal.com%252Fwechat&response_type=code&scope=snsapi_userinfo#wechat_redirect";
+            //const url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252F1d17-202-189-110-181.ngrok-free.app%252Fwechat&response_type=code&scope=snsapi_userinfo#wechat_redirect";
+            window.location.href = url
         },
 
         verifyRefused(){
@@ -103,7 +104,7 @@ export default {
                     }
                     else if(res.data.code == '401'){
                         this.loaded = false
-                        this.alert_text='为入场，请先入场签到'
+                        this.alert_text='未入场，请先入场签到'
                         this.alert = true;
                     }else{
                         this.loaded = false
@@ -152,7 +153,7 @@ export default {
                             console.log("not binded or refused")
                             
                             //检查微信环境
-                            if (/MicroMessenger/i.test(window.navigator.userAgent)){
+                            if (navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger"){
                                 console.log("wechat")
                                 this.verifyInWechat()
                             }
@@ -186,7 +187,7 @@ export default {
                 )
                 .catch(error => {
                     console.log(error);
-                    this.alert_text = '扫描失败请重试'
+                    this.alert_text = '请求失败请重试'
                     this.alert = true;
                     setTimeout(() => {
                         this.alert = false;
@@ -214,17 +215,18 @@ export default {
 
 .alert{
     flex:0 !important;
-    padding: 20px 0 20px 0;
     margin-top: 20px;
     width: 80%;
-    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
 .qr{
     margin-top:2vh;
     width:70%;
-    align-self: center;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 .hide{

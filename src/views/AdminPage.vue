@@ -1,10 +1,24 @@
 <template>
-
+        <h2 style="margin-top: 3vh;" v-if="loggedin">签票模式</h2>
         <v-alert 
-            :class= "'alert mt-3 '+ (alert? '' : 'd-none') "
+            :class= "'w-75 mx-auto mt-3 '+ (alert? '' : 'd-none') "
             color="warning"
             density="compact"
             :text = "alert_text"
+        ></v-alert>
+
+        <v-alert 
+            :class= "'w-75 mx-auto mt-3 '+ (success? '' : 'd-none') "
+            color="success"
+            density="compact"
+            text = "签票成功"
+        ></v-alert>
+
+        <v-alert 
+            :class= "'w-75 mx-auto mt-3 '+ (fail? '' : 'd-none') "
+            color="error"
+            density="compact"
+            text = "签票失败"
         ></v-alert>
 
         <v-card 
@@ -53,35 +67,12 @@
         </v-card>
 
         <div v-else>
+            <StreamBarcodeReader
+                :style="'margin-left: auto; margin-right: auto; width: 75vw;' + (alert||fail||success? 'margin-top: 20px;' :'margin-top: 73px;')"
+                @decode="onDecode"
+                @loaded="()=>{loading = false;}"
+            ></StreamBarcodeReader>
 
-            <div v-if="checkInMode">
-                <StreamBarcodeReader
-                    style="margin-left: auto; margin-right: auto;"
-                    v-if = "!isWechat"
-                    :class="'qr '+(alert? 'mt-3': 'mt-16')" 
-                    @decode="onDecode"
-                ></StreamBarcodeReader>
-                <v-btn
-                    class="mt-8"
-                    @click="() => {this.checkInMode = false; this.alert = false}"
-                    size="large"
-                    color="secondary"
-                >
-                    管理模式
-                </v-btn>
-            </div>
-
-            <div v-else>
-                <v-btn
-                    class="mt-8"
-                    @click="() => {checkIfWechat()}"
-                    size="large"
-                    color="primary"
-                >
-                    签票模式
-                </v-btn>
-            </div>
-            
         </div>
 
 
@@ -108,76 +99,80 @@
                 password: null,
                 loading: false,
                 alert: false,
-                alert_text: "登陆失败请重试",
+                alert_text: "登录失败请重试",
                 token: null,
                 checkInMode: false,
                 isWechat: false,
+                success: false,
+                fails: false,
             }
         },
 
 
         methods: {
             onDecode(text) {
-                console.log(`Decode text from QR code is ${text}`)
-                const domain = decodeURI(text).split('=')[0];
-                const key = decodeURI(text).split('=')[1];
-                if (domain != 'https://v.6re.co?k'){
-                    this.alert_text = "无效的二维码"
-                    this.alert = true;
-                    setTimeout(() => {
-                        this.alert = false;
-                    }, 1000);
-                    return
-                }
-                axios.post("https://api.singcon23.hkupootal.com/admin/checkin.php",{
-                    token: this.token,
-                    user_key: key
-                }, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                .then(
-                    (res) => {
-                        if(res.data.code == "200"){
-                            this.alert_text = "签到成功"
-                            this.alert = true;
-                            setTimeout(() => {
-                                this.alert = false;
-                            }, 1000);
-                        }else if (res.data.code == "400"){
-                            this.alert_text = "无效票"
-                            this.alert = true;
-                            setTimeout(() => {
-                                this.alert = false;
-                            }, 1000);
-                        }else if (res.data.code == "401"){
-                            this.alert_text = "已入场"
-                            this.alert = true;
-                            setTimeout(() => {
-                                this.alert = false;
-                            }, 1000);
-                        }else if (res.data.code == "500"){
-                            this.alert_text = "签到失败"
-                            this.alert = true;
-                            setTimeout(() => {
-                                this.alert = false;
-                            }, 1000);
-                        }else{
-                            this.alert_text = "staff登陆过期, 刷新网页重新登陆"
-                            this.alert = true;
-                        }
-                    }
-                ).catch(
-                    (err) => {
-                        console.log(err)
-                        this.alert_text = "签到失败"
+                if (!this.loading){
+                    this.loading = true;
+                    console.log(`Decode text from QR code is ${text}`)
+                    const domain = decodeURI(text).split('=')[0];
+                    const key = decodeURI(text).split('=')[1];
+                    if (domain != 'https://v.6re.co?k'){
+                        alert(text)
+                        this.alert_text = "无效的二维码"
                         this.alert = true;
                         setTimeout(() => {
+                            this.loading = false;
                             this.alert = false;
-                        }, 1000);
+                        }, 3000);
+                        return
                     }
-                )
+                    axios.post("https://api.singcon23.hkupootal.com/admin/checkin.php",{
+                        token: this.token,
+                        user_key: key
+                    }, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    .then(
+                        (res) => {
+                            if(res.data.code == "200"){
+                                this.success = true;
+                                setTimeout(() => {
+                                    this.success = false;
+                                    this.loading = false;
+                                }, 3000);
+                            }else if (res.data.code == "401"){
+                                this.alert_text = "已入场"
+                                this.alert = true;
+                                setTimeout(() => {
+                                    this.alert = false;
+                                    this.loading = false;
+                                }, 3000);
+                            }else if (res.data.code == "500" || res.data.code == "400"){
+                                this.fail = true
+                                setTimeout(() => {
+                                    this.fail = false;
+                                    this.loading = false;
+                                }, 3000);
+                            }else{
+                                this.alert_text = "staff登录过期, 刷新网页重新登陆"
+                                this.alert = true;
+                            }
+                        }
+                    ).catch(
+                        (err) => {
+                            console.log(err)
+                            this.alert_text = "请求失败， 请重试"
+                            this.alert = true;
+                            setTimeout(() => {
+                                this.alert = false;
+                                this.loading = false;
+                            }, 3000);
+                        }
+                    )
+                }
+                
                 
             },
 
@@ -224,19 +219,19 @@
                 this.checkInMode = true
                 //检查微信环境
                 if (/MicroMessenger/i.test(window.navigator.userAgent)){
-                    this.isWechat=true;
-                    this.configWechat().then(
-                        () => {
-                            wx.ready( () => {
-                                console.log("WXready")
-                            })
+                    // this.isWechat=true;
+                    // this.configWechat().then(
+                    //     () => {
+                    //         wx.ready( () => {
+                    //             console.log("WXready")
+                    //         })
 
-                            wx.error( () => {
-                                console.log("WXerror")
-                            })
-                        }
+                    //         wx.error( () => {
+                    //             console.log("WXerror")
+                    //         })
+                    //     }
 
-                    )
+                    // )
                 }
             },
             onSubmit () {
@@ -267,7 +262,7 @@
                             }, 5000);
                         }
                         else{
-                            this.alert_text = "登陆失败请重试"
+                            this.alert_text = "登录失败请重试"
                             this.alert = true;
                             setTimeout(() => {
                                 this.alert = false;
@@ -276,7 +271,7 @@
                     }
                 ).catch(() => {
                     this.loading = false
-                    this.alert_text = "登陆失败请重试"
+                    this.alert_text = "登录失败请重试"
                     this.alert = true;
                     setTimeout(() => {
                         this.alert = false;
@@ -294,5 +289,7 @@
 </script>
 
 <style>
-
+.h2{
+    margin-top: 9vh;
+}
 </style>

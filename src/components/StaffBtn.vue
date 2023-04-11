@@ -21,7 +21,7 @@ export default {
 <style>
 .button{
     position: absolute;
-    bottom: 24vh;
+    bottom: 5vh;
     right: 20px;
 }
 </style>

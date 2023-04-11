@@ -41,7 +41,6 @@
 <script>
 import axios from 'axios';
 import StaffBtn from '../components/StaffBtn.vue';
-var wx = require('weixin-js-sdk');
 
 export default{
     components: {
@@ -58,10 +57,10 @@ export default{
     },
     methods:{
         verifyInWechat(){
-            wx.setStorageSync('user_key', this.key)
+            sessionStorage.setItem('user_key', this.key)
             this.overlay = true;
+            const url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252Fsingcon23.hkupootal.com%252Fwechat&response_type=code&scope=snsapi_userinfo#wechat_redirect";
             //const url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252Fsingcon23.hkupootal.com%252Fwechat&response_type=code&scope=snsapi_base#wechat_redirect";
-            const url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx91a4ad470fb0b432&redirect_uri=https%3A%2F%2Fone.hkupootal.com%3Furl%3Dhttps%253A%252F%252Fsingcon23.hkupootal.com%252Fwechat&response_type=code&scope=snsapi_base#wechat_redirect";
             window.location.href = url;
         },
 
@@ -88,7 +87,7 @@ export default{
                     }
                     else if(res.data.code == '401'){
                         this.loaded = false
-                        this.alert_text='为入场，请先入场签到'
+                        this.alert_text='未入场，请先入场签到'
                         this.alert = true;
                     }else{
                         this.loaded = false
