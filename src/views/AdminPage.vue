@@ -1,5 +1,5 @@
 <template>
-        <h2 style="margin-top: 3vh;" v-if="loggedin">签票模式</h2>
+        <h2 style="margin-top: 3vh;" v-if="loggedin">检票</h2>
         <v-alert 
             :class= "'w-75 mx-auto mt-3 '+ (alert? '' : 'd-none') "
             color="warning"
@@ -11,14 +11,14 @@
             :class= "'w-75 mx-auto mt-3 '+ (success? '' : 'd-none') "
             color="success"
             density="compact"
-            text = "签票成功"
+            text = "检票成功"
         ></v-alert>
 
         <v-alert 
             :class= "'w-75 mx-auto mt-3 '+ (fail? '' : 'd-none') "
             color="error"
             density="compact"
-            text = "签票失败"
+            text = "检票失败"
         ></v-alert>
 
         <v-card 
@@ -26,7 +26,7 @@
             max-width="344"
             v-if = "!loggedin"
         >
-            <h3 class="mb-10">后台登陆</h3>
+            <h3 class="mb-10">检票系统登录</h3>
             <v-form
             v-model="form"
             @submit.prevent="onSubmit"
@@ -61,7 +61,7 @@
                 type="submit"
                 variant="elevated"
             >
-                登陆
+                登录
             </v-btn>
             </v-form>
         </v-card>
@@ -138,6 +138,8 @@
                         (res) => {
                             if(res.data.code == "200"){
                                 this.success = true;
+                                const success_audio = new Audio("success.mp3");
+                                success_audio.play();
                                 setTimeout(() => {
                                     this.success = false;
                                     this.loading = false;
@@ -145,18 +147,22 @@
                             }else if (res.data.code == "401"){
                                 this.alert_text = "已入场"
                                 this.alert = true;
+                                const fail_audio = new Audio("fail.mp3");
+                                fail_audio.play();
                                 setTimeout(() => {
                                     this.alert = false;
                                     this.loading = false;
                                 }, 3000);
                             }else if (res.data.code == "500" || res.data.code == "400"){
                                 this.fail = true
+                                const fail_audio = new Audio("fail.mp3");
+                                fail_audio.play();
                                 setTimeout(() => {
                                     this.fail = false;
                                     this.loading = false;
                                 }, 3000);
                             }else{
-                                this.alert_text = "staff登录过期, 刷新网页重新登陆"
+                                this.alert_text = "staff登录过期, 刷新网页重新登录"
                                 this.alert = true;
                             }
                         }

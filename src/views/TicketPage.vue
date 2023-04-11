@@ -31,8 +31,6 @@
                 <img src="loading.gif"/>
             </v-overlay>
     </div>
-
-    <StaffBtn/>
    
 
 
@@ -40,12 +38,8 @@
 
 <script>
 import axios from 'axios';
-import StaffBtn from '../components/StaffBtn.vue';
 
 export default{
-    components: {
-        StaffBtn
-    },
     data(){
         return{
             loaded :false,

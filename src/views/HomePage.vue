@@ -39,7 +39,6 @@
         ></v-alert>
 
 
-        <StaffBtn></StaffBtn>
 
 
 </template>
@@ -47,12 +46,10 @@
 <script>
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import axios from 'axios';
-import StaffBtn from '../components/StaffBtn.vue';
 
 export default {
     components: {
-        StreamBarcodeReader,
-        StaffBtn
+        StreamBarcodeReader
     },
     data() {
         return {
