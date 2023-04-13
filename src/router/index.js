@@ -36,6 +36,21 @@ const routes = [
     name: 'wechat',
     query: {code: ''},
     component: () => import('../views/WechatPage.vue')
+  },
+  {
+    path: '/realtime',
+    name: 'realtime',
+    component: () => import('../views/RealtimePage.vue')
+  },
+  {
+    path: '/phone/:token',
+    name: 'phone',
+    component: () => import('../views/PhonePage.vue')
+  },
+  {
+    path: '/gun/:token',
+    name: 'gun',
+    component: () => import('../views/GunPage.vue')
   }
 ]
 

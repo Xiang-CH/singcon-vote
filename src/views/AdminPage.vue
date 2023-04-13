@@ -257,8 +257,7 @@
                     (res) => {
                         this.loading = false
                         if(res.data.code == "200"){
-                            this.loggedin = true;
-                            this.token = res.data.token;
+                            this.$router.push({ name: 'phone', params: {token: res.data.token} });
                         }
                         else if(res.data.code == "400"){
                             this.alert_text = "用户名或密码错误"
