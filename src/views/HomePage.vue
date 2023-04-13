@@ -236,7 +236,7 @@ h1{
 }
 
 .wechatPrompt{
-    color: #104e8d;
+    color: #5C6BC0;
     margin-top: 60px;
     margin-bottom: 30px;
     text-align: center;
